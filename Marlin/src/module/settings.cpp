@@ -59,6 +59,11 @@
   #include "../HAL/shared/eeprom_api.h"
 #endif
 
+// JGMaker R1 uses special SPI EEPROM library
+#if ENABLED(SPI_EEPROM)
+  #include "../libs/W25Qxx.h"
+#endif
+
 #if HAS_SPINDLE_ACCELERATION
   #include "../feature/spindle_laser.h"
 #endif
@@ -888,13 +893,22 @@ void MarlinSettings::postprocess() {
   bool MarlinSettings::save() {
     float dummyf = 0;
 
+    #if ENABLED(SPI_EEPROM) //JGMaker R1 Customization
+      W25QXX.init(SPI_QUARTER_SPEED);
+      W25QXX.SPI_FLASH_SectorErase(0);
+    #endif
+
     if (!EEPROM_START(EEPROM_OFFSET)) return false;
 
     EEPROM_Error eeprom_error = ERR_EEPROM_NOERR;
 
     // Write or Skip version. (Flash doesn't allow rewrite without erase.)
     constexpr char dummy_version[] = "ERR";
-    TERN(FLASH_EEPROM_EMULATION, EEPROM_SKIP, EEPROM_WRITE)(dummy_version);
+    #if ENABLED(SPI_EEPROM) //JGMaker R1 Customization
+       EEPROM_SKIP(dummy_version);
+     #else
+      TERN(FLASH_EEPROM_EMULATION, EEPROM_SKIP, EEPROM_WRITE)(dummy_version);
+    #endif
 
     #if ENABLED(EEPROM_INIT_NOW)
       EEPROM_SKIP(build_hash);  // Skip the hash slot which will be written later

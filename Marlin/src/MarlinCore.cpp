@@ -54,6 +54,11 @@
   #include "module/ft_motion.h"
 #endif
 
+// JGMaker R1 requires a special library for SPI EEPROM
+#if ENABLED(SPI_EEPROM)
+   #include "libs/W25Qxx.h"
+#endif
+
 #include "gcode/gcode.h"
 #include "gcode/parser.h"
 #include "gcode/queue.h"
@@ -1380,6 +1385,11 @@ void setup() {
   #if ALL(HAS_WIRED_LCD, SHOW_BOOTSCREEN)
     SETUP_RUN(ui.show_bootscreen());
     const millis_t bootscreen_ms = millis();
+  #endif
+
+  // Initialize JGMaker R1 EEPROM
+  #if ENABLED(SPI_EEPROM)
+    W25QXX.init(SPI_QUARTER_SPEED);
   #endif
 
   SETUP_RUN(settings.first_load());   // Load data from EEPROM if available (or use defaults)

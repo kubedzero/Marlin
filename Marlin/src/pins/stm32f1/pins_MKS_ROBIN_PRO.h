@@ -32,7 +32,7 @@
   #error "MKS Robin pro supports up to 3 hotends / E steppers."
 #endif
 
-#define BOARD_INFO_NAME "MKS Robin pro"
+#define BOARD_INFO_NAME "MKS Robin Pro" //JGMaker R1 customization
 
 #define BOARD_NO_NATIVE_USB
 
@@ -44,11 +44,13 @@
 //
 // Onboard I2C EEPROM
 //
+/* //JGMaker R1 customization: not present
 #define IIC_BL24CXX_EEPROM                // Use I2C EEPROM onboard IC (AT24C04C, Size 4K, PageSize 16B)
 #define MARLIN_EEPROM_SIZE               0x1000U  // 4K
 #define IIC_EEPROM_SDA                      PB7
 #define IIC_EEPROM_SCL                      PB6
 #define EEPROM_DEVICE_ADDRESS             0xA0
+*/
 
 //
 // SPI
@@ -80,9 +82,12 @@
 //
 // Steppers
 //
-#define X_ENABLE_PIN                        PE4
-#define X_STEP_PIN                          PE3
-#define X_DIR_PIN                           PE2
+// JGMaker R1 is modeled on MKS Robin Pro, but slightly different
+// X Stepper pins are actually E2 pins, so in this file they're swapped
+// PE4 -> PF0, PE3->PF2, PE2->PF1
+#define X_ENABLE_PIN                        PF0
+#define X_STEP_PIN                          PF2
+#define X_DIR_PIN                           PF1
 #ifndef X_CS_PIN
   #define X_CS_PIN                          PF8
 #endif
@@ -115,12 +120,14 @@
   #define E1_CS_PIN                         PG10
 #endif
 
+/* //JGMaker R1 customization
 #define E2_ENABLE_PIN                       PF0
 #define E2_STEP_PIN                         PF2
 #define E2_DIR_PIN                          PF1
 #ifndef E2_CS_PIN
   #define E2_CS_PIN                         PG9
 #endif
+*/
 
 //
 // SPI pins for TMC2130 stepper drivers
@@ -149,8 +156,11 @@
   //#define E1_HARDWARE_SERIAL MSerial1
   //#define E2_HARDWARE_SERIAL MSerial1
 
-  #define X_SERIAL_TX_PIN                   PF7
-  #define X_SERIAL_RX_PIN                   PF8
+  // Since the X and E2 hookups are swapped on the JGMaker R1,
+  // swap the TMC_UART pins as well. 
+  // TX/PF7 original, now PC13. RX/PF8 original, now PG9
+  #define X_SERIAL_TX_PIN                   PC13
+  #define X_SERIAL_RX_PIN                   PG9
 
   #define Y_SERIAL_TX_PIN                   PF4
   #define Y_SERIAL_RX_PIN                   PF3
@@ -164,8 +174,10 @@
   #define E1_SERIAL_TX_PIN                  PG12
   #define E1_SERIAL_RX_PIN                  PG10
 
-  #define E2_SERIAL_TX_PIN                  PC13
-  #define E2_SERIAL_RX_PIN                  PG9
+  #define E2_SERIAL_TX_PIN                  PF7 //JGMaker R1 customization
+  #define E2_SERIAL_RX_PIN                  PF8
+  // Artist D manual recommends adding this for UART mode
+  #define TMC_BAUD_RATE 19200
 #endif
 
 //
@@ -181,7 +193,8 @@
 //
 #define HEATER_0_PIN                        PF10  // +HE0-
 #define HEATER_1_PIN                        PB0   // +HE1-
-#define HEATER_2_PIN                        PF9   // +HE2-
+// Disable PF9 so it can be used as the Inductive Z Probe in Config.h
+// #define HEATER_2_PIN                        PF9   // +HE2-
 #define HEATER_BED_PIN                      PA0   // +HOT-BED-
 #define FAN0_PIN                            PB1   // +FAN-
 
@@ -409,13 +422,30 @@
   #define BOARD_ST7920_DELAY_3               125
 #endif
 
+// Set up SPI EEPROM (which shares some pins of SPI_FLASH)
+#define SPI_EEPROM
+#define SPI_CHAN_EEPROM1                  2
+#define SPI_EEPROM1_CS_PIN                    PB12 
+#define MARLIN_EEPROM_SIZE 						    0x1000  
+// disabling due to redefining E2END already in stm32_eeprom.h
+//#define E2END 									          0xFFF
+
+// JGMaker R1 doesn't have a flash chip, but rather EEPROM. 
+// Use a different variable to avoid triggering HAS_SPI_FLASH logic in other files
 #define SPI_FLASH
+// #define HAS_SPI_FLASH         1
 #if ENABLED(SPI_FLASH)
-  #define SPI_FLASH_SIZE               0x1000000  // 16MB
-  #define SPI_FLASH_CS_PIN                  PB12  // Flash chip-select
-  #define SPI_FLASH_SCK_PIN                 PB13
-  #define SPI_FLASH_MISO_PIN                PB14
-  #define SPI_FLASH_MOSI_PIN                PB15
+	#define 	W25QXX_CS_PIN	                 	PB12
+	#define 	W25QXX_MOSI_PIN	              	PB15
+	#define 	W25QXX_MISO_PIN	              	PB14
+	#define 	W25QXX_SCK_PIN	              	PB13
+  #define   SPI_FLASH_SIZE                  0x1000000  // 16MB
+    // define extra values set to the same pins
+    //W25Qxx.cpp used to provide a translation, but no longer
+  #define SPI_FLASH_CS_PIN W25QXX_CS_PIN
+  #define SPI_FLASH_MISO_PIN W25QXX_MISO_PIN
+  #define SPI_FLASH_MOSI_PIN W25QXX_MOSI_PIN
+  #define SPI_FLASH_SCK_PIN  W25QXX_SCK_PIN
 #endif
 
 //

@@ -22,7 +22,7 @@
 
 #include "../inc/MarlinConfig.h"
 
-#if ENABLED(SPI_FLASH)
+#if ANY(SPI_FLASH, SPI_EEPROM) //JGMaker R1 Customization
 
 #include "W25Qxx.h"
 
