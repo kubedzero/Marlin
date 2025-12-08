@@ -26,6 +26,7 @@
  */
 
 #include "../../inc/MarlinConfig.h"
+#include"../../libs/W25Qxx.h" //JGMaker R1 Customization
 
 #if ENABLED(SPI_EEPROM)
 
@@ -56,28 +57,16 @@ static void _eeprom_begin(uint8_t * const pos, const uint8_t cmd) {
 }
 
 uint8_t eeprom_read_byte(uint8_t *pos) {
-  _eeprom_begin(pos, CMD_READ);   // Set read location and begin transmission
-
-  const uint8_t v = spiRec(SPI_CHAN_EEPROM1); // After READ a value sits on the Bus
-
-  WRITE(SPI_EEPROM1_CS_PIN, HIGH);    // Done with device
+  // JGMaker R1 uses an alternate way to read from SPI EEPROM
+  uint8_t v;
+  W25QXX.SPI_FLASH_BufferRead((uint8_t *)&v,(uint32_t)pos,1);
 
   return v;
 }
 
 void eeprom_write_byte(uint8_t *pos, uint8_t value) {
-  const uint8_t eeprom_temp = CMD_WREN;
-  WRITE(SPI_EEPROM1_CS_PIN, LOW);
-  spiSend(SPI_CHAN_EEPROM1, &eeprom_temp, 1); // Write Enable
-
-  WRITE(SPI_EEPROM1_CS_PIN, HIGH);      // Done with the Bus
-  delay(1);                         // For a small amount of time
-
-  _eeprom_begin(pos, CMD_WRITE);    // Set write address and begin transmission
-
-  spiSend(SPI_CHAN_EEPROM1, value); // Send the value to be written
-  WRITE(SPI_EEPROM1_CS_PIN, HIGH);      // Done with the Bus
-  delay(EEPROM_WRITE_DELAY);        // Give page write time to complete
+  // JGMaker R1 uses an alternate way to write to SPI EEPROM
+  W25QXX.SPI_FLASH_BufferWrite((uint8_t *)&value,(uint32_t)pos,1);
 }
 
 #endif // USE_SHARED_EEPROM

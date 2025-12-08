@@ -182,10 +182,10 @@
 #ifndef TEMP_BED_PIN
   #define TEMP_BED_PIN                      PB2   // TB
 #endif
-#ifndef TEMP_PROBE_PIN
+#ifndef TEMP_SENSOR_PROBE
   #define TEMP_PROBE_PIN                    PA1   // TH2
 #endif
-#ifndef TEMP_CHAMBER_PIN
+#ifndef TEMP_SENSOR_CHAMBER
   #define TEMP_CHAMBER_PIN                  PA0   // TH3
 #endif
 

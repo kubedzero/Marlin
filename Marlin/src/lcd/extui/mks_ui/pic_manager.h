@@ -127,6 +127,7 @@
 #define REFLSHE_FLGA_ADD                (0x800000 - 32)
 
 // SD card information first addr
+// JGMaker R1 changes this value to 0x001000 for some reason
 #define VAR_INF_ADDR                    0x000000
 #define FLASH_INF_VALID_FLAG            0x20201118
 
